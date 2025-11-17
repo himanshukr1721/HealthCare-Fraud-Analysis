@@ -1,0 +1,36 @@
+# Core Dependencies
+pandas
+numpy
+scikit-learn
+
+# Graph Libraries
+networkx
+python-louvain
+
+# PyTorch and PyTorch Geometric
+torch
+torch-geometric
+torch-scatter
+torch-sparse
+torch-cluster
+
+# Neo4j
+neo4j
+
+# Explainability
+shap
+lime
+
+# Visualization
+matplotlib
+seaborn
+plotly
+
+# Streamlit
+streamlit
+streamlit-plotly-events
+
+# Utilities
+tqdm
+python-dotenv
+
