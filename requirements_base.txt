@@ -1,0 +1,26 @@
+# Core Dependencies (install these first)
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+
+# Graph Libraries
+networkx>=3.0
+python-louvain>=0.16
+
+# Explainability
+shap>=0.42.0
+lime>=0.2.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.16.0
+
+# Streamlit
+streamlit>=1.26.0
+streamlit-plotly-events>=0.0.6
+
+# Utilities
+tqdm>=4.66.0
+python-dotenv>=1.0.0
+
