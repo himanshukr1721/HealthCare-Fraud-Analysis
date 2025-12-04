@@ -22,8 +22,63 @@ class HealthcareDataPreprocessor:
     
     def clean_column_names(self):
         """Standardize column names"""
+        # Strip whitespace
         self.df.columns = self.df.columns.str.strip()
-        print("Column names cleaned")
+        
+        # Normalize common column name variations to standard names
+        column_mapping = {
+            'claimid': 'ClaimID',
+            'claim_id': 'ClaimID',
+            'claim id': 'ClaimID',
+            'patientid': 'PatientID',
+            'patient_id': 'PatientID',
+            'patient id': 'PatientID',
+            'providerid': 'ProviderID',
+            'provider_id': 'ProviderID',
+            'provider id': 'ProviderID',
+            'claimamount': 'ClaimAmount',
+            'claim_amount': 'ClaimAmount',
+            'claim amount': 'ClaimAmount',
+            'claimdate': 'ClaimDate',
+            'claim_date': 'ClaimDate',
+            'claim date': 'ClaimDate',
+            'diagnosiscode': 'DiagnosisCode',
+            'diagnosis_code': 'DiagnosisCode',
+            'diagnosis code': 'DiagnosisCode',
+            'procedurecode': 'ProcedureCode',
+            'procedure_code': 'ProcedureCode',
+            'procedure code': 'ProcedureCode',
+            'patientage': 'PatientAge',
+            'patient_age': 'PatientAge',
+            'patient age': 'PatientAge',
+            'patientgender': 'PatientGender',
+            'patient_gender': 'PatientGender',
+            'patient gender': 'PatientGender',
+            'providerspecialty': 'ProviderSpecialty',
+            'provider_specialty': 'ProviderSpecialty',
+            'provider specialty': 'ProviderSpecialty',
+            'claimstatus': 'ClaimStatus',
+            'claim_status': 'ClaimStatus',
+            'claim status': 'ClaimStatus',
+            'claimtype': 'ClaimType',
+            'claim_type': 'ClaimType',
+            'claim type': 'ClaimType',
+            'diagnosisdate': 'DiagnosisDate',
+            'diagnosis_date': 'DiagnosisDate',
+            'diagnosis date': 'DiagnosisDate'
+        }
+        
+        # Apply mapping (case-insensitive)
+        new_columns = []
+        for col in self.df.columns:
+            col_lower = col.lower()
+            if col_lower in column_mapping:
+                new_columns.append(column_mapping[col_lower])
+            else:
+                new_columns.append(col)
+        
+        self.df.columns = new_columns
+        print("Column names cleaned and normalized")
         
     def handle_missing_values(self):
         """Handle missing values based on column type"""
@@ -49,9 +104,37 @@ class HealthcareDataPreprocessor:
         """Remove duplicate claims"""
         print("\nRemoving duplicates...")
         initial_count = len(self.df)
-        self.df.drop_duplicates(subset=['ClaimID'], inplace=True)
-        removed = initial_count - len(self.df)
-        print(f"Removed {removed} duplicate records")
+        
+        # Try to find ClaimID column (case-insensitive)
+        claim_id_col = None
+        for col in self.df.columns:
+            if col.strip().lower() == 'claimid':
+                claim_id_col = col
+                break
+        
+        if claim_id_col:
+            self.df.drop_duplicates(subset=[claim_id_col], inplace=True)
+            removed = initial_count - len(self.df)
+            print(f"Removed {removed} duplicate records")
+        else:
+            # If no ClaimID column, try to remove duplicates based on all columns
+            # or use a combination of key columns if available
+            key_cols = []
+            for col_name in ['PatientID', 'ProviderID', 'ClaimDate', 'ClaimAmount']:
+                for col in self.df.columns:
+                    if col.strip().lower() == col_name.lower():
+                        key_cols.append(col)
+                        break
+            
+            if key_cols:
+                self.df.drop_duplicates(subset=key_cols, inplace=True)
+                removed = initial_count - len(self.df)
+                print(f"Removed {removed} duplicate records (using key columns: {', '.join(key_cols)})")
+            else:
+                # Last resort: remove duplicates based on all columns
+                self.df.drop_duplicates(inplace=True)
+                removed = initial_count - len(self.df)
+                print(f"Removed {removed} duplicate records (using all columns)")
         
     def validate_dates(self):
         """Validate and convert date columns"""

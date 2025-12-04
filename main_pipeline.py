@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).parent / 'src'))
 
 from src.preprocessing import HealthcareDataPreprocessor
 from src.kg_gnn_model import HealthcareKnowledgeGraph, HealthcareGNN, GNNTrainer
-from src.explainanbility import GNNExplainer
+from src.explainanbility import HealthcareGNNExplainer
 from src.utils import (
     get_project_root, get_data_path, get_output_path, 
     get_model_path, save_json, print_separator
@@ -75,15 +75,18 @@ def train_model(graph_data: Data, df: pd.DataFrame):
         dropout=0.3
     )
     
-    print(f"Model initialized with input_dim={input_dim}")
+    # Initialize trainer
+    trainer = GNNTrainer(model, graph_data)
     
     # Train the model
-    trainer = GNNTrainer(model, graph_data)
-    final_acc = trainer.train(epochs=200)
+    print("\nTraining model...")
+    trainer.train(epochs=100)
     
-    print(f"Training completed with accuracy: {final_acc:.4f}")
+    # Evaluate final accuracy
+    final_acc = trainer.evaluate(graph_data.test_mask)
+    print(f"\nFinal Test Accuracy: {final_acc:.4f}")
     
-    # Save model architecture info
+    # Save model info
     model_info = {
         'input_dim': input_dim,
         'hidden_dim': 64,
@@ -114,7 +117,7 @@ def generate_explanations(model, graph_data, df: pd.DataFrame):
     ]
     
     # GNN explainer
-    explainer = GNNExplainer(model, graph_data, feature_names)
+    explainer = HealthcareGNNExplainer(model, graph_data, feature_names)
     
     # Explain a few sample nodes
     explanations = []
